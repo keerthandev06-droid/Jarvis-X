@@ -1,14 +1,17 @@
 from modules.memory import get_owner
-from modules.greetings import welcome, goodbye
 from modules.commands import execute_command
 from modules.utils import clear_screen
+from modules.ui import banner
 
 
 def main():
     clear_screen()
 
     owner = get_owner()
-    welcome(owner)
+
+    banner()
+
+    print(f"\n👋 Welcome back, {owner}!")
 
     while True:
         command = input(f"\n{owner} > ").strip()
@@ -17,7 +20,7 @@ def main():
             continue
 
         if command.lower() in ["exit", "quit", "bye"]:
-            goodbye(owner)
+            print("\n👋 Goodbye!")
             break
 
         execute_command(command)
