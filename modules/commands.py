@@ -5,7 +5,11 @@ from modules.utils import (
     clear_screen,
 )
 
-from modules.browser import google_search, youtube_search
+from modules.browser import (
+    google_search,
+    youtube_search,
+)
+
 from modules.apps import (
     open_notepad,
     open_calculator,
@@ -20,47 +24,86 @@ from modules.notes import (
 
 
 def execute_command(command):
-    cmd = command.lower()
 
-    if cmd == "help":
+    text = command.lower().strip()
+
+    # ---------------- HELP ----------------
+
+    if text == "help":
         show_help()
+        return
 
-    elif cmd == "time":
+    # ---------------- TIME ----------------
+
+    if "time" in text:
         current_time()
+        return
 
-    elif cmd == "date":
+    # ---------------- DATE ----------------
+
+    if "date" in text:
         current_date()
+        return
 
-    elif cmd == "clear":
+    # ---------------- CLEAR ----------------
+
+    if text == "clear":
         clear_screen()
+        return
 
-    elif cmd == "notepad":
+    # ---------------- OPEN APPS ----------------
+
+    if "notepad" in text:
         open_notepad()
+        return
 
-    elif cmd == "calculator":
+    if "calculator" in text or "calc" in text:
         open_calculator()
+        return
 
-    elif cmd == "explorer":
+    if "explorer" in text or "file explorer" in text:
         open_explorer()
+        return
 
-    elif cmd == "browser":
+    if "browser" in text or "firefox" in text:
         open_browser()
+        return
 
-    elif cmd.startswith("google "):
-        query = command[7:]
-        google_search(query)
+    # ---------------- GOOGLE ----------------
 
-    elif cmd.startswith("youtube "):
-        query = command[8:]
-        youtube_search(query)
+    if text.startswith("google "):
+        google_search(command[7:])
+        return
 
-    elif cmd.startswith("note "):
-        text = command[5:]
-        save_note(text)
+    if text.startswith("search google "):
+        google_search(command[14:])
+        return
 
-    elif cmd == "notes":
+    # ---------------- YOUTUBE ----------------
+
+    if text.startswith("youtube "):
+        youtube_search(command[8:])
+        return
+
+    if text.startswith("search youtube "):
+        youtube_search(command[15:])
+        return
+
+    # ---------------- NOTES ----------------
+
+    if text.startswith("note "):
+        save_note(command[5:])
+        return
+
+    if text.startswith("save note "):
+        save_note(command[10:])
+        return
+
+    if text == "notes":
         show_notes()
+        return
 
-    else:
-        print("\n❌ Unknown command.")
-        print("Type 'help' to see available commands.")
+    # ---------------- UNKNOWN ----------------
+
+    print("\n❌ I don't understand that command.")
+    print("Type 'help' to see available commands.")
