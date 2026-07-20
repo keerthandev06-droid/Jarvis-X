@@ -2,19 +2,22 @@ import os
 import shutil
 import subprocess
 
+from config import (
+    APPLICATIONS,
+    BROWSER_EXECUTABLE,
+    BROWSER_NAME,
+    BROWSER_PATHS,
+    FILE_EXPLORER_PATH,
+)
+
 
 def get_firefox():
-    firefox = shutil.which("firefox")
+    firefox = shutil.which(BROWSER_EXECUTABLE)
 
     if firefox:
         return firefox
 
-    possible_paths = [
-        r"C:\Program Files\Mozilla Firefox\firefox.exe",
-        r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
-    ]
-
-    for path in possible_paths:
+    for path in BROWSER_PATHS:
         if os.path.exists(path):
             return path
 
@@ -23,7 +26,7 @@ def get_firefox():
 
 def open_notepad():
     try:
-        subprocess.Popen("notepad.exe")
+        subprocess.Popen(APPLICATIONS["notepad"])
         print("✅ Opening Notepad...")
     except Exception as e:
         print(f"❌ {e}")
@@ -31,7 +34,7 @@ def open_notepad():
 
 def open_calculator():
     try:
-        subprocess.Popen("calc.exe")
+        subprocess.Popen(APPLICATIONS["calculator"])
         print("✅ Opening Calculator...")
     except Exception as e:
         print(f"❌ {e}")
@@ -39,7 +42,7 @@ def open_calculator():
 
 def open_explorer():
     try:
-        os.startfile("C:\\")
+        os.startfile(FILE_EXPLORER_PATH)
         print("✅ Opening File Explorer...")
     except Exception as e:
         print(f"❌ {e}")
@@ -50,6 +53,6 @@ def open_browser():
 
     if firefox:
         subprocess.Popen([firefox])
-        print("🦊 Opening Firefox...")
+        print(f"🦊 Opening {BROWSER_NAME}...")
     else:
-        print("❌ Firefox was not found on this PC.")
+        print(f"❌ {BROWSER_NAME} was not found on this PC.")

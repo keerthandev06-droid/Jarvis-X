@@ -1,3 +1,4 @@
+from config import EXIT_COMMANDS
 from modules.memory import get_owner
 from modules.commands import execute_command
 from modules.utils import clear_screen
@@ -19,7 +20,7 @@ def main():
         if command == "":
             continue
 
-        if command.lower() in ["exit", "quit", "bye"]:
+        if command.lower() in EXIT_COMMANDS:
             print("\n👋 Goodbye!")
             break
 

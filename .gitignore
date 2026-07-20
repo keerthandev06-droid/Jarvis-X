@@ -14,6 +14,10 @@ env/
 # Logs
 *.log
 
+# Generated file indexes
+data/file_index.db
+data/file_index.json
+
 # OS files
 Thumbs.db
 Desktop.ini

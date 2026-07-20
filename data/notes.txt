@@ -1,1 +1,7 @@
 Today I built Jarvis-X
+jarvisx version 08
+migration test
+hello
+hello jarvis
+logging test
+hello jarvis

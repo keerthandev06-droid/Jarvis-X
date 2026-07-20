@@ -1,6 +1,7 @@
 import json
 import os
-from config import MEMORY_FILE
+
+from config import JSON_INDENT, MEMORY_FILE, TEXT_ENCODING
 
 
 def load_memory():
@@ -9,16 +10,16 @@ def load_memory():
         return {}
 
     try:
-        with open(MEMORY_FILE, "r") as file:
+        with open(MEMORY_FILE, "r", encoding=TEXT_ENCODING) as file:
             return json.load(file)
-    except:
+    except Exception:
         return {}
 
 
 def save_memory(data):
     """Save memory to JSON file."""
-    with open(MEMORY_FILE, "w") as file:
-        json.dump(data, file, indent=4)
+    with open(MEMORY_FILE, "w", encoding=TEXT_ENCODING) as file:
+        json.dump(data, file, indent=JSON_INDENT)
 
 
 def get_owner():

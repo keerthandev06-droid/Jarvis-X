@@ -1,109 +1,67 @@
-from modules.utils import (
-    current_time,
-    current_date,
-    show_help,
-    clear_screen,
-)
+"""
+Jarvis-X Command Processor
+Version: 1.2.0
+"""
 
-from modules.browser import (
-    google_search,
-    youtube_search,
-)
+from core.parser import normalize
+from core.intents import detect_intent
+from core.command_registry import COMMANDS
+from core.resource_manager import open_resource
+from core.logger import info, warning as log_warning, error as log_error
 
-from modules.apps import (
-    open_notepad,
-    open_calculator,
-    open_explorer,
-    open_browser,
-)
-
-from modules.notes import (
-    save_note,
-    show_notes,
-)
+from modules.ui import warning
 
 
 def execute_command(command):
+    """
+    Main Command Dispatcher
+    """
 
-    text = command.lower().strip()
+    # Log user command
+    info(f"User Command: {command}")
 
-    # ---------------- HELP ----------------
+    normalized = normalize(command)
 
-    if text == "help":
-        show_help()
+    intent, value = detect_intent(normalized)
+
+    # ---------- OPEN RESOURCE ----------
+
+    if intent in ("open_app", "open_file"):
+
+        if open_resource(value):
+            info(f"Opened Resource: {value}")
+        else:
+            warning(f'"{value}" not found.')
+            log_warning(f'Resource Not Found: {value}')
+
         return
 
-    # ---------------- TIME ----------------
+    # ---------- OTHER COMMANDS ----------
 
-    if "time" in text:
-        current_time()
+    handler = COMMANDS.get(intent)
+
+    if handler is None:
+        warning("Unknown command.")
+        log_warning(f"Unknown Command: {command}")
         return
 
-    # ---------------- DATE ----------------
+    try:
+        if value:
+            handler(value)
+        else:
+            handler()
 
-    if "date" in text:
-        current_date()
-        return
+        info(f"Executed Intent: {intent}")
 
-    # ---------------- CLEAR ----------------
+    except TypeError:
 
-    if text == "clear":
-        clear_screen()
-        return
+        try:
+            handler()
+            info(f"Executed Intent: {intent}")
+        except Exception as e:
+            warning(str(e))
+            log_error(str(e))
 
-    # ---------------- OPEN APPS ----------------
-
-    if "notepad" in text:
-        open_notepad()
-        return
-
-    if "calculator" in text or "calc" in text:
-        open_calculator()
-        return
-
-    if "explorer" in text or "file explorer" in text:
-        open_explorer()
-        return
-
-    if "browser" in text or "firefox" in text:
-        open_browser()
-        return
-
-    # ---------------- GOOGLE ----------------
-
-    if text.startswith("google "):
-        google_search(command[7:])
-        return
-
-    if text.startswith("search google "):
-        google_search(command[14:])
-        return
-
-    # ---------------- YOUTUBE ----------------
-
-    if text.startswith("youtube "):
-        youtube_search(command[8:])
-        return
-
-    if text.startswith("search youtube "):
-        youtube_search(command[15:])
-        return
-
-    # ---------------- NOTES ----------------
-
-    if text.startswith("note "):
-        save_note(command[5:])
-        return
-
-    if text.startswith("save note "):
-        save_note(command[10:])
-        return
-
-    if text == "notes":
-        show_notes()
-        return
-
-    # ---------------- UNKNOWN ----------------
-
-    print("\n❌ I don't understand that command.")
-    print("Type 'help' to see available commands.")
+    except Exception as e:
+        warning(str(e))
+        log_error(str(e))

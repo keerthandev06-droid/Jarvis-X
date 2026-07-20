@@ -1,25 +1,30 @@
 import shutil
 import subprocess
 
+from config import (
+    BROWSER_EXECUTABLE,
+    BROWSER_NAME,
+    BROWSER_PATHS,
+    GOOGLE_HOMEPAGE_URL,
+    GOOGLE_URL,
+    SEARCH_SPACE_REPLACEMENT,
+    YOUTUBE_URL,
+)
+
 
 def get_firefox():
-    """Find Firefox automatically."""
-    firefox = shutil.which("firefox")
+    """Find the configured browser automatically."""
+    firefox = shutil.which(BROWSER_EXECUTABLE)
 
     if firefox:
         return firefox
 
-    possible_paths = [
-        r"C:\Program Files\Mozilla Firefox\firefox.exe",
-        r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
-    ]
-
-    for path in possible_paths:
+    for path in BROWSER_PATHS:
         try:
             with open(path):
                 pass
             return path
-        except:
+        except Exception:
             continue
 
     return None
@@ -31,7 +36,7 @@ def open_url(url):
     if firefox:
         subprocess.Popen([firefox, url])
     else:
-        print("❌ Firefox was not found on this PC.")
+        print(f"❌ {BROWSER_NAME} was not found on this PC.")
 
 
 def google_search(query):
@@ -39,7 +44,7 @@ def google_search(query):
         print("❌ Please enter a search.")
         return
 
-    open_url(f"https://www.google.com/search?q={query.replace(' ', '+')}")
+    open_url(f"{GOOGLE_URL}{query.replace(' ', SEARCH_SPACE_REPLACEMENT)}")
     print(f"🔍 Searching Google for: {query}")
 
 
@@ -48,10 +53,10 @@ def youtube_search(query):
         print("❌ Please enter a search.")
         return
 
-    open_url(f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}")
+    open_url(f"{YOUTUBE_URL}{query.replace(' ', SEARCH_SPACE_REPLACEMENT)}")
     print(f"▶️ Searching YouTube for: {query}")
 
 
 def open_homepage():
-    open_url("https://www.google.com")
-    print("🦊 Opening Firefox...")
+    open_url(GOOGLE_HOMEPAGE_URL)
+    print(f"🦊 Opening {BROWSER_NAME}...")

@@ -1,11 +1,11 @@
-from config import ASSISTANT_NAME, VERSION
+from config import ASSISTANT_NAME, GREETING_WIDTH, VERSION
 
 
 def welcome(owner):
-    print("=" * 50)
+    print("=" * GREETING_WIDTH)
     print(f"🤖 Welcome to {ASSISTANT_NAME}")
     print(f"Version: {VERSION}")
-    print("=" * 50)
+    print("=" * GREETING_WIDTH)
 
     if owner:
         print(f"\nHello, {owner}!")
