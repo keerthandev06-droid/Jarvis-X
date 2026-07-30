@@ -1,11 +1,12 @@
 """
 Jarvis-X File Search Engine
-Version: 2.1.0
+Version: 2.2.0
 """
 
 import os
 
 from core.database import connect, create_table
+from core.search_engine import search
 from modules.ui import success, warning
 
 LOW_PRIORITY = (
@@ -14,49 +15,89 @@ LOW_PRIORITY = (
     "appdata",
     "__pycache__",
     "node_modules",
+    ".git",
+    "temp",
+    "cache",
+    "logs",
+    "build",
+    "dist",
+    "venv",
+    "env",
 )
 
 EXT_SCORES = {
-    ".exe": 60,
-    ".lnk": 40,
-    ".bat": 35,
-    ".cmd": 35,
+    ".exe": 80,
+    ".lnk": 60,
+    ".bat": 40,
+    ".cmd": 40,
+    ".url": 30,
 }
 
 
 def _score(name, path, item_type, query):
+    """
+    Calculate ranking score for a search result.
+    Higher score = higher in results.
+    """
     n = name.lower()
     p = path.lower()
+
     score = 0
 
+    # ---------- Name Matching ----------
+
     if n == query:
-        score += 100
+        score += 120
     elif n.startswith(query):
-        score += 80
+        score += 90
     elif query in n:
-        score += 40
+        score += 50
+
+    # ---------- File Type ----------
 
     if item_type == "folder":
-        score += 15
+        score += 10
     else:
-        score += EXT_SCORES.get(os.path.splitext(n)[1], 0)
+        extension = os.path.splitext(n)[1]
+        score += EXT_SCORES.get(extension, 0)
+
+    # ---------- Preferred Locations ----------
+
+    if "start menu" in p:
+        score += 80
+
+    if "windowsapps" in p:
+        score += 40
+
+    if "desktop" in p:
+        score += 30
+
+    if "program files" in p:
+        score += 30
+
+    if p.startswith(r"c:\python"):
+        score += 30
+
+    # ---------- Low Priority ----------
 
     for bad in LOW_PRIORITY:
         if bad in p:
-            score -= 80
-
-    if "program files" in p or p.startswith(r"c:\python"):
-        score += 25
+            score -= 100
 
     return score
 
 
 def search_items(name, limit=20):
+    """
+    Search indexed files/folders and return
+    ranked results.
+    """
     query = name.lower().strip()
 
     create_table()
 
     conn = connect()
+
     try:
         rows = conn.cursor().execute(
             """
@@ -67,19 +108,22 @@ def search_items(name, limit=20):
             """,
             (f"%{query}%",),
         ).fetchall()
+
     finally:
         conn.close()
 
-    rows = sorted(
-        rows,
-        key=lambda r: (-_score(r[0], r[1], r[2], query), r[0].lower()),
-    )
+        # ---------- Smart Search Engine ----------
+
+    rows = search(query, rows)
 
     return rows[:limit]
 
 
 def open_file(name):
-    results = search_items(name, 1)
+    """
+    Open the highest-ranked matching file.
+    """
+    results = search_items(name, limit=1)
 
     if not results:
         return False
@@ -93,6 +137,9 @@ def open_file(name):
 
 
 def smart_find(name):
+    """
+    Search and interactively open indexed files/folders.
+    """
     results = search_items(name)
 
     if not results:
@@ -104,8 +151,9 @@ def smart_find(name):
     print(f"Search Results ({len(results)})")
     print("=" * 60)
 
-    for i, (filename, path, item_type) in enumerate(results, 1):
+    for i, (filename, path, item_type) in enumerate(results, start=1):
         label = "📁 Folder" if item_type == "folder" else "📄 File"
+
         print(f"{i}. {filename}")
         print(f"   {label}")
         print(f"   {path}")
@@ -122,16 +170,16 @@ def smart_find(name):
             print("Please enter a valid number.")
             continue
 
-        idx = int(choice)
+        index = int(choice)
 
-        if not 1 <= idx <= len(results):
+        if not 1 <= index <= len(results):
             print("Invalid selection.")
             continue
 
         try:
-            os.startfile(results[idx - 1][1])
-            success(f"Opened: {results[idx - 1][0]}")
+            os.startfile(results[index - 1][1])
+            success(f"Opened: {results[index - 1][0]}")
             return
-        except Exception:
-            warning("Unable to open the selected item.")
+        except Exception as e:
+            warning(f"Unable to open the selected item: {e}")
             return

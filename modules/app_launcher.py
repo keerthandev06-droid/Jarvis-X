@@ -1,64 +1,54 @@
 """
-Jarvis-X Universal App Launcher
-Version: 1.1.0
+Jarvis-X Application Launcher
+Supports:
+- .lnk
+- .exe
+- Windows Store (UWP/MSIX) apps
 """
 
 import os
-import shutil
 import subprocess
 
-from config import APPLICATIONS
-from modules.ui import success
-
-
-def find_executable(app_entry):
-    if isinstance(app_entry, str):
-        path = shutil.which(app_entry)
-
-        if path:
-            return path
-
-        if os.path.exists(app_entry):
-            return app_entry
-
-        return None
-
-    if isinstance(app_entry, list):
-
-        for item in app_entry:
-
-            path = shutil.which(item)
-
-            if path:
-                return path
-
-            if os.path.exists(item):
-                return item
-
-    return None
+from modules.app_database import search_app
+from modules.ui import success, warning
 
 
 def open_app(app_name):
     """
-    Returns:
-        True  -> App opened
-        False -> App not found
+    Open an application by name.
     """
 
-    app_name = app_name.lower().strip()
+    results = search_app(app_name)
 
-    if app_name not in APPLICATIONS:
+    if not results:
+        warning(f"Application '{app_name}' not found.")
         return False
 
-    executable = find_executable(APPLICATIONS[app_name])
-
-    if executable is None:
-        return False
+    name, path, app_type = results[0]
 
     try:
-        subprocess.Popen([executable])
-        success(f"Opening {app_name.title()}...")
-        return True
 
-    except Exception:
+        if app_type in ("lnk", "exe"):
+            os.startfile(path)
+            success(f"Opening {name}...")
+            return True
+
+        elif app_type == "store":
+            subprocess.Popen(
+                [
+                    "explorer.exe",
+                    f"shell:AppsFolder\\{path}",
+                ]
+            )
+
+            success(f"Opening {name}...")
+            return True
+
+        else:
+            warning(f"Unsupported application type: {app_type}")
+            return False
+
+    except Exception as e:
+        warning(f"Failed to open {name}")
+        print(e)
         return False

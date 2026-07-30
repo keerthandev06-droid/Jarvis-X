@@ -10,6 +10,7 @@ from config import (
     INDEX_PROGRESS_TEMPLATE,
     SCAN_DRIVES,
     SKIP_FOLDERS,
+    SKIP_PATHS,
     IGNORE_FOLDERS,
     IGNORE_EXTENSIONS,
 )
@@ -78,18 +79,33 @@ def build_index():
                     onerror=handle_walk_error,
                 ):
 
-                    # Skip unwanted folders while walking
-                    dirs[:] = [
-                        folder
-                        for folder in dirs
-                        if folder.lower() not in SKIP_FOLDERS
-                        and folder.lower() not in IGNORE_FOLDERS
-                    ]
+                    # Current directory being scanned
+                    current_root = root.lower()
+
+                    # ---------------- DEBUG ----------------
+                    # Skip entire directory trees
+                    if any(skip in current_root for skip in SKIP_PATHS):
+                        dirs[:] = []
+                        continue
 
                     # ---------------- FOLDERS ----------------
+                    filtered_dirs = []
 
                     for folder in dirs:
+                        folder_name = folder.lower()
 
+                        if folder_name in SKIP_FOLDERS:
+                            continue
+
+                        if folder_name in IGNORE_FOLDERS:
+                            continue
+
+                        filtered_dirs.append(folder)
+
+                    dirs[:] = filtered_dirs
+
+                    # Index folders
+                    for folder in dirs:
                         batch.append(
                             (
                                 folder.lower(),
@@ -102,7 +118,6 @@ def build_index():
                         total_folders += 1
 
                     # ---------------- FILES ----------------
-
                     for file in files:
 
                         extension = os.path.splitext(file)[1].lower()
@@ -121,6 +136,7 @@ def build_index():
 
                         total_files += 1
 
+                    # Flush batch
                     if len(batch) >= BATCH_SIZE:
                         flush_batch(cursor, batch)
 
@@ -131,17 +147,6 @@ def build_index():
                             end="",
                             flush=True,
                         )
-
-            flush_batch(cursor, batch)
-
-            print(
-                INDEX_PROGRESS_TEMPLATE.format(
-                    count=total_files + total_folders
-                ),
-                end="",
-                flush=True,
-            )
-
     finally:
         conn.close()
 

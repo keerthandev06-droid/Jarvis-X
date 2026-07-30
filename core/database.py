@@ -17,10 +17,15 @@ def connect():
 
 def create_table():
     """
-    Create the files table and search indexes if they don't exist.
+    Create all database tables.
     """
+
     conn = connect()
     cursor = conn.cursor()
+
+    # -------------------------------------------------
+    # Files
+    # -------------------------------------------------
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS files (
@@ -42,6 +47,24 @@ def create_table():
         ON files(type, name)
     """)
 
+    # -------------------------------------------------
+    # Applications
+    # -------------------------------------------------
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            path TEXT NOT NULL,
+            type TEXT NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_apps_name
+        ON applications(name)
+    """)
+
     conn.commit()
     conn.close()
 
@@ -49,3 +72,5 @@ def create_table():
 if __name__ == "__main__":
     create_table()
     print("Database initialized successfully.")
+
+    

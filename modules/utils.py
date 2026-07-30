@@ -1,48 +1,101 @@
 """
 Jarvis-X Utility Functions
-Version: 1.2.1
+Version: 3.0.0
 """
 
 import os
 from datetime import datetime
 
-from config import (
-    DATE_FORMAT,
-    HELP_COMMANDS,
-    HELP_WIDTH,
-    OTHER_CLEAR_COMMAND,
-    TIME_FORMAT,
-    WINDOWS_CLEAR_COMMAND,
-)
-from modules.ui import info
-
-
-# ---------------- CLEAR SCREEN ---------------- #
-
-def clear_screen():
-    os.system(WINDOWS_CLEAR_COMMAND if os.name == "nt" else OTHER_CLEAR_COMMAND)
-
-
-# ---------------- TIME ---------------- #
 
 def current_time():
-    current = datetime.now().strftime(TIME_FORMAT)
-    info(f"Current Time : {current}")
+    """
+    Display current time.
+    """
+    print(
+        f"ℹ️ Current Time : "
+        f"{datetime.now().strftime('%I:%M:%S %p')}"
+    )
 
-
-# ---------------- DATE ---------------- #
 
 def current_date():
-    current = datetime.now().strftime(DATE_FORMAT)
-    info(f"Current Date : {current}")
+    """
+    Display current date.
+    """
+    print(
+        f"ℹ️ Current Date : "
+        f"{datetime.now().strftime('%d-%m-%Y')}"
+    )
 
 
-# ---------------- HELP ---------------- #
+def clear_screen():
+    """
+    Clear console.
+    """
+    os.system("cls")
+
 
 def show_help():
-    print("\n============= AVAILABLE COMMANDS =============")
+    """
+    Display all available commands.
+    """
 
-    for command, description in HELP_COMMANDS:
-        print(f"{command:<20} - {description}")
+    print()
 
-    print("=" * HELP_WIDTH)
+    print("=" * 55)
+    print("              AVAILABLE COMMANDS")
+    print("=" * 55)
+
+    print()
+    print("GENERAL")
+    print("-" * 55)
+    print("help                     Show help")
+    print("time                     Current time")
+    print("date                     Current date")
+    print("clear                    Clear screen")
+
+    print()
+    print("APPLICATIONS")
+    print("-" * 55)
+    print("open <app>               Open application")
+    print("open <file>              Open file")
+    print("find <name>              Search files")
+
+    print()
+    print("WEB")
+    print("-" * 55)
+    print("google <query>           Google Search")
+    print("youtube <query>          YouTube Search")
+
+    print()
+    print("NOTES")
+    print("-" * 55)
+    print("note <text>              Save note")
+    print("notes                    Show notes")
+
+    print()
+    print("POWER")
+    print("-" * 55)
+    print("shutdown                 Shutdown PC")
+    print("restart                  Restart PC")
+    print("cancel shutdown          Cancel Shutdown")
+    print("lock                     Lock Computer")
+    print("sleep                    Sleep Computer")
+    print("logoff                   Log Off")
+
+    print()
+    print("MAINTENANCE")
+    print("-" * 55)
+    print("reindex                  Rebuild File Index")
+    print("rebuild_apps             Rebuild App Database")
+
+    print()
+    print("AI")
+    print("-" * 55)
+    print("Ask anything naturally")
+    print("Example:")
+    print("What is Python?")
+    print("Latest AI news")
+    print("Jana Nayagan collection today")
+
+    print()
+    print("=" * 55)

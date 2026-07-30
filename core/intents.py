@@ -1,6 +1,6 @@
 """
 Jarvis-X Intent Detection Engine
-Version: 2.0.0
+Version: 2.1.0
 """
 
 from config import FILE_EXTENSIONS
@@ -20,6 +20,15 @@ def detect_intent(command):
 
     if text == "reindex":
         return ("reindex", "")
+
+    # ---------- REBUILD APPS ----------
+
+    if text in (
+        "rebuild apps",
+        "scan apps",
+        "refresh apps",
+    ):
+        return ("rebuild_apps", "")
 
     # ---------- FIND ----------
 
